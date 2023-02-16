@@ -52,7 +52,6 @@ def city_actions(city_id):
     if request.method == 'PUT':
         data = request.get_json()
         if data is None or type(data) is not dict:
-            print("Error: 400")
             return 'Not a JSON', 400
         for attr, val in data.items():
             if attr not in ['id', 'state_id', 'created_at', 'updated_at']:
