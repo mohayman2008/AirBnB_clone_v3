@@ -8,7 +8,7 @@ import inspect
 import models
 from models.engine import db_storage
 from models.amenity import Amenity
-from models.base_model import BaseModel
+from models.base_model import BaseModel, Base
 from models.city import City
 from models.place import Place
 from models.review import Review
@@ -86,3 +86,36 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json"""
+
+    @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
+    @unittest.skipIf(os.getenv('HBNB_ENV') != 'test', "Destructive DB testing")
+    def test_get_count(self):
+        '''Tests the get and count methods'''
+        models.storage.close()
+        storage = DBStorage()
+        storage.reload()
+
+        self.assertEqual(storage.count(), 0)
+        self.assertIs(storage.get(None, "1234"), None)
+        self.assertIs(storage.get("abc", 1234), None)
+        self.assertIs(storage.get(City, 1234), None)
+
+        amenity = Amenity(name="XYZ")
+        state = State(name='ABC')
+        city = City(name='ABC', state_id=state.id)
+        user = User(name='AAA', email="aaa@bbb.ccc", password='pwd')
+        place = Place(name='A place', user_id=user.id, city_id=city.id)
+        review = Review(user_id=user.id, place_id=place.id, text="text")
+
+        objects = [amenity, state, city, user, place, review]
+        for obj in objects:
+            cls = obj.__class__
+            self.assertEqual(storage.count(cls), 0)
+            storage.new(obj)
+            self.assertEqual(storage.count(cls), 1)
+            self.assertIs(storage.get(cls, obj.id), obj)
+
+        storage.save()
+        self.assertEqual(storage.count(), len(objects))
+
+        storage.close()

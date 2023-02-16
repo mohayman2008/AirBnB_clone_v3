@@ -38,14 +38,14 @@ class FileStorage:
         '''Retreive an object of class "cls" and with id "id"'''
         if cls not in classes.values():
             return None
-        idx = cls.__name__ + '.' + id
+        idx = cls.__name__ + '.' + str(id)
         return self.__objects.get(idx)
 
     def count(self, cls=None):
         '''Count the number of objects stored'''
         if cls and cls in classes.values():
             objects = [obj for obj in self.__objects.values()
-                       if isinstance(obj, cls)]
+                       if type(obj) is cls]
             return len(objects)
         return len(self.__objects.keys())
 
