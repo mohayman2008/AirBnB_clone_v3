@@ -1,18 +1,18 @@
 #!/usr/bin/python3
-'''View to handle the RESTful API actions for 'State' objects'''
+'''View to handle the RESTful API actions for 'Amenity' objects'''
 from flask import jsonify, request, abort
 
 from api.v1.views import app_views
-from models.state import State
+from models.state import Amenity
 from models import storage
 
 
-@app_views.route('/states', methods=['GET', 'POST'], strict_slashes=False)
-def states():
-    '''Handles "/states" route'''
+@app_views.route('/amenities', methods=['GET', 'POST'], strict_slashes=False)
+def amenities():
+    '''Handles "/amenities" route'''
     if request.method == 'GET':
-        states = [state.to_dict() for state in storage.all(State).values()]
-        return jsonify(states)
+        amenities = [amenity.to_dict() for amenity in storage.all(Amenity).values()]
+        return jsonify(amenities)
 
     if request.method == 'POST':
         data = request.get_json()
@@ -21,24 +21,24 @@ def states():
         name = data.get('name')
         if name is None:
             return 'Missing name', 400
-        state = State(**data)
-        state.save()
-        return jsonify(state.to_dict()), 201
+        amenity = Amenity(**data)
+        amenity.save()
+        return jsonify(amenity.to_dict()), 201
 
 
-@app_views.route('/states/<string:state_id>',
+@app_views.route('/amenities/<string:amenity_id>',
                  methods=['GET', 'PUT', 'DELETE'], strict_slashes=False)
-def state_actions(state_id):
-    '''Handles actions for "/states/<state_id>" route'''
-    state = storage.get(State, state_id)
-    if state is None:
+def amenity_actions(amenity_id):
+    '''Handles actions for "/amenities/<amenity_id>" route'''
+    amenity = storage.get(Amenity, amenity_id)
+    if amenity is None:
         abort(404)
 
     if request.method == 'GET':
-        return jsonify(state.to_dict())
+        return jsonify(amenity.to_dict())
 
     if request.method == 'DELETE':
-        storage.delete(state)
+        storage.delete(amenity)
         storage.save()
         return jsonify({}), 200
 
@@ -48,6 +48,6 @@ def state_actions(state_id):
             return 'Not a JSON', 400
         for attr, val in data.items():
             if attr not in ['id', 'created_at', 'updated_at']:
-                setattr(state, attr, val)
-        state.save()
-        return jsonify(state.to_dict()), 200
+                setattr(amenity, attr, val)
+        amenity.save()
+        return jsonify(amenity.to_dict()), 200
