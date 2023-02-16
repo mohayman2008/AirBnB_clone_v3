@@ -3,7 +3,7 @@
 from flask import jsonify, request, abort
 
 from api.v1.views import app_views
-from models.state import Amenity
+from models.amenity import Amenity
 from models import storage
 
 
@@ -11,7 +11,8 @@ from models import storage
 def amenities():
     '''Handles "/amenities" route'''
     if request.method == 'GET':
-        amenities = [amenity.to_dict() for amenity in storage.all(Amenity).values()]
+        amenities = [amenity.to_dict()
+                     for amenity in storage.all(Amenity).values()]
         return jsonify(amenities)
 
     if request.method == 'POST':
