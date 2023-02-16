@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-'''Script that starts a RESTful API server with flask'''
+'''The API auxillary routes'''
 from flask import jsonify
 
 from api.v1.views import app_views
@@ -15,15 +15,15 @@ classes = {"amenities": Amenity, "cities": City, "places": Place,
            "reviews": Review, "states": State, "users": User}
 
 
-@app_views.route('/status')
+@app_views.route('/status', strict_slashes=False)
 def status():
-    '''Returns the JSON {"status": "OK"} for "/status route"'''
+    '''Returns the JSON {"status": "OK"} for "/status" route'''
     return jsonify({"status": "OK"})
 
 
-@app_views.route('/stats')
+@app_views.route('/stats', strict_slashes=False)
 def stats():
-    '''Returns the JSON {"status": "OK"} for "/status route"'''
+    '''Returns stats for the objects in the storage for "/stats" route'''
     stats = {}
     for key, cls in classes.items():
         stats[key] = storage.count(cls)
