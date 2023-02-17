@@ -25,8 +25,8 @@ def places_amenities(place_id):
 
 @app_views.route('/places/<string:place_id>/amenities/<string:amenity_id>',
                  methods=['POST', 'DELETE'], strict_slashes=False)
-def places_amenity_actions(review_id, amenity_id):
-    '''Handles actions for "places/<place_id>/amenities/<amenity_id>" route'''
+def places_amenity_actions(place_id, amenity_id):
+    '''Handles actions for "/places/<place_id>/amenities/<amenity_id>" route'''
     place = storage.get(Place, place_id)
     if place is None:
         abort(404)
@@ -44,15 +44,17 @@ def places_amenity_actions(review_id, amenity_id):
             if amenity_id not in place.amenity_ids:
                 abort(404)
             place.amenity_ids.remove(amenity_id)
+        storage.save()
         return jsonify({}), 200
 
     if request.method == 'POST':
         if models.storage_t == 'db':
             if amenity in place.amenities:
-                return jsonify(amenity), 200
+                return jsonify(amenity.to_dict()), 200
             place.amenities.append(amenity)
         else:
             if amenity_id in place.amenity_ids:
-                return jsonify(amenity), 200
+                return jsonify(amenity.to_dict()), 200
             place.amenity_ids.append(amenity_id)
-        return jsonify(amenity), 201
+        storage.save()
+        return jsonify(amenity.to_dict()), 201
