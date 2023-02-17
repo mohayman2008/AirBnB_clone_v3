@@ -76,7 +76,7 @@ def place_actions(place_id):
 def places_search():
     '''Handles search for places on the route "/places_search"'''
     params = request.get_json()
-    if params is None or type(data) is not dict:
+    if params is None or type(params) is not dict:
         return 'Not a JSON', 400
 
     cities = []
@@ -85,11 +85,12 @@ def places_search():
     if states_ids:
         for state_id in states_ids:
             state = storage.get(State, state_id)
-            cities.extend(state.cities)
+            if state:
+                cities.extend(state.cities)
     if cities_ids:
         for city_id in cities_ids:
             city = storage.get(City, city_id)
-            if city not in cities:
+            if city and city not in cities:
                 cities.append(city)
     if len(cities) == 0:
         places_list = storage.all(Place)
@@ -99,7 +100,7 @@ def places_search():
             places_list.extend(city.places)
 
     amenities_ids = params.get('amenities')
-    if not amenities:
+    if not amenities_ids:
         places = places_list
     else:
         places = []
@@ -114,5 +115,5 @@ def places_search():
                 if all(amenity_id in place.amenity_id
                        for amenity_id in amenities_ids):
                     places.append(place)
-    places_dicts = [place.to_dict for place in places]
+    places_dicts = [place.to_dict() for place in places]
     return jsonify(places_dicts)
