@@ -3,10 +3,12 @@
 from flask import jsonify, request, abort
 
 from api.v1.views import app_views
+from models.state import State
 from models.city import City
 from models.user import User
 from models.place import Place
-from models import storage
+from models.amenity import Amenity
+from models import storage, storage_t
 
 
 @app_views.route('/cities/<string:city_id>/places', methods=['GET', 'POST'],
@@ -68,3 +70,49 @@ def place_actions(place_id):
                 setattr(place, attr, val)
         place.save()
         return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search', methods=['POST'], strict_slashes=False)
+def places_search():
+    '''Handles search for places on the route "/places_search"'''
+    params = request.get_json()
+    if params is None or type(data) is not dict:
+        return 'Not a JSON', 400
+
+    cities = []
+    states_ids = params.get('states')
+    cities_ids = params.get('cities')
+    if states_ids:
+        for state_id in states_ids:
+            state = storage.get(State, state_id)
+            cities.extend(state.cities)
+    if cities_ids:
+        for city_id in cities_ids:
+            city = storage.get(City, city_id)
+            if city not in cities:
+                cities.append(city)
+    if len(cities) == 0:
+        places_list = storage.all(Place)
+    else:
+        places_list = []
+        for city in cities:
+            places_list.extend(city.places)
+
+    amenities_ids = params.get('amenities')
+    if not amenities:
+        places = places_list
+    else:
+        places = []
+
+        if storage_t == 'db':
+            amenities = [storage.get(Amenity, id) for id in amenities_ids]
+            for place in places_list:
+                if all(amenity in place.amenities for amenity in amenities):
+                    places.append(place)
+        else:
+            for place in places_list:
+                if all(amenity_id in place.amenity_id
+                       for amenity_id in amenities_ids):
+                    places.append(place)
+    places_dicts = [place.to_dict for place in places]
+    return jsonify(places_dicts)
