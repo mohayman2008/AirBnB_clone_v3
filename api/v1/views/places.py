@@ -108,7 +108,11 @@ def places_search():
     #         places_list.extend(city.places)
     places_list = []
     for city in cities:
-        places_list.extend(city.places)
+        if storage_t == 'db':
+            places_list.extend(city.places)
+        else:
+            places_list.extend([place for place in storage.all(Place)
+                                if place.city_id == city.id])
 
     amenities_ids = params.get('amenities')
     if not amenities_ids or len(amenities_ids) == 0:
